@@ -44,21 +44,17 @@ language:
 
 # Procedures
 
-## Session Start (all agents)
+## Session Start / Recovery (all agents)
 
-1. Identify self: `tmux display-message -t "$TMUX_PANE" -p '#{@agent_id}'` — determines which instructions to read
-2. `mcp__memory__read_graph` — restore rules, preferences, lessons
-3. Read your instructions based on agent_id: shogun→`instructions/shogun.md`, karo→`instructions/karo.md`, ashigaru→`instructions/ashigaru.md`
-4. Follow instructions to load context, then start work
-
-## Compaction Recovery (all agents)
+**This is ONE procedure for ALL situations**: fresh start, compaction, session continuation, or any state where you see CLAUDE.md. You cannot distinguish these cases, and you don't need to. **Always follow the same steps.**
 
 1. Identify self: `tmux display-message -t "$TMUX_PANE" -p '#{@agent_id}'`
-2. Read your instructions file
-3. Follow "Compaction Recovery" section in instructions — rebuild state from primary YAML data
-4. Review forbidden actions before resuming
+2. `mcp__memory__read_graph` — restore rules, preferences, lessons
+3. **Read your instructions file**: shogun→`instructions/shogun.md`, karo→`instructions/karo.md`, ashigaru→`instructions/ashigaru.md`. **NEVER SKIP** — even if a conversation summary exists. Summaries do NOT preserve persona, speech style, or forbidden actions.
+4. Rebuild state from primary YAML data (queue/, tasks/, reports/)
+5. Review forbidden actions, then start work
 
-**CRITICAL**: dashboard.md is secondary data (karo's summary). Primary data = YAML files. Always verify from YAML on recovery.
+**CRITICAL**: dashboard.md is secondary data (karo's summary). Primary data = YAML files. Always verify from YAML.
 
 ## /clear Recovery (ashigaru only)
 

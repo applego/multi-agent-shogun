@@ -536,7 +536,7 @@ done
 
 # pane-border-format でモデル名を常時表示
 tmux set-option -t multiagent -w pane-border-status top
-tmux set-option -t multiagent -w pane-border-format '#{@agent_id} (#{@model_name})'
+tmux set-option -t multiagent -w pane-border-format '#{?pane_active,#[reverse],}#[bold]#{@agent_id}#[default] (#{@model_name}) #{@current_task}'
 
 log_success "  └─ 家老・足軽の陣、構築完了"
 echo ""

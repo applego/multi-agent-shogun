@@ -664,6 +664,40 @@ bash scripts/ntfy_listener.sh
 - 家老がタスク割当・完了時に自動更新
 - 9ペインを一目見れば、誰が何をしているか即座にわかる
 
+### 🔊 10. シャウトモード（戦国エコー）
+
+足軽がタスクを完了すると、パーソナライズされた戦国風の叫びをtmuxペインに表示します — 部下が働いている実感を得られる。
+
+```
+┌ ashigaru1 (Sonnet) ──────────┬ ashigaru2 (Sonnet) ──────────┐
+│                               │                               │
+│  ⚔️ 足軽1号、任を果たし待機！ │  🔥 足軽2号、二番槍の意地！   │
+│  八刃一志の志、胸に刻む！     │  八刃一志！共に城を落とせ！   │
+│  ❯                            │  ❯                            │
+└───────────────────────────────┴───────────────────────────────┘
+```
+
+**仕組み:**
+
+家老がタスクYAMLに `echo_message` フィールドを記述。足軽は全作業完了後（レポート + inbox通知の後）、**最後のアクション**として `echo` を実行。メッセージは `❯` プロンプト直上に残る。
+
+```yaml
+# タスクYAML（家老が記述）
+task:
+  task_id: subtask_001
+  description: "比較表を作成"
+  echo_message: "🔥 足軽1号、先陣を切って参る！八刃一志！"
+```
+
+**シャウトモードがデフォルト。** 無効にする場合（echoのAPIトークン節約）:
+
+```bash
+./shutsujin_departure.sh --silent    # 戦国エコーなし
+./shutsujin_departure.sh             # デフォルト: シャウトモード（戦国エコー有効）
+```
+
+サイレントモードは `DISPLAY_MODE=silent` をtmux環境変数に設定。家老がタスクYAML作成時にこれを確認し、`echo_message` フィールドを省略する。
+
 ### 📝 9. Content Feedback System — 継続的スキル改善
 
 （削除済み）
@@ -1105,6 +1139,10 @@ ntfy_topic: "shogun-yourname"
 ./shutsujin_departure.sh -k
 ./shutsujin_departure.sh --kessen
 
+# サイレントモード: 戦国エコーを無効化（echoのAPIトークン節約）
+./shutsujin_departure.sh -S
+./shutsujin_departure.sh --silent
+
 # フル起動 + Windows Terminalタブを開く
 ./shutsujin_departure.sh -t
 ./shutsujin_departure.sh --terminal
@@ -1386,6 +1424,9 @@ tmux respawn-pane -t shogun:0.0 -k 'claude --model opus --dangerously-skip-permi
 - **決戦モード**（`-k` フラグ）— 全足軽Opusの最大能力陣形
 - **タスク依存関係システム**（`blockedBy`）— 依存タスクの自動ブロック解除
 - **5つの統合テンプレート** — ファクトファインディング、提案書、コードレビュー、分析の標準化レポート形式
+- **シャウトモード**（デフォルト）— 足軽がタスク完了時にパーソナライズされた戦国風の叫びを表示。`--silent` で無効化
+- **nudge-only メールボックス** — ファイルベースのinboxで通信、`send-keys` は1行の起床通知のみ送信。配信障害を根絶
+- **エージェント自己識別**（`@agent_id`）— tmuxユーザーオプションによる安定したID、ペイン再配置の影響を受けない
 
 </details>
 

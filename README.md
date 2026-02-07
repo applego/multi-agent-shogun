@@ -687,6 +687,40 @@ Each tmux pane shows the agent's current task directly on its border:
 - Updated automatically by the Karo when assigning or completing tasks
 - Glance at all 9 panes to instantly know who's doing what
 
+### 🔊 10. Shout Mode (Battle Cries)
+
+When an Ashigaru completes a task, it shouts a personalized battle cry in the tmux pane — a visual reminder that your army is working hard.
+
+```
+┌ ashigaru1 (Sonnet) ──────────┬ ashigaru2 (Sonnet) ──────────┐
+│                               │                               │
+│  ⚔️ 足軽1号、先陣切った！     │  🔥 足軽2号、二番槍の意地！   │
+│  八刃一志！                   │  八刃一志！                   │
+│  ❯                            │  ❯                            │
+└───────────────────────────────┴───────────────────────────────┘
+```
+
+**How it works:**
+
+The Karo writes an `echo_message` field in each task YAML. After completing all work (report + inbox notification), the Ashigaru runs `echo` as its **final action**. The message stays visible above the `❯` prompt.
+
+```yaml
+# In the task YAML (written by Karo)
+task:
+  task_id: subtask_001
+  description: "Create comparison table"
+  echo_message: "🔥 足軽1号、先陣を切って参る！八刃一志！"
+```
+
+**Shout mode is the default.** To disable (saves API tokens on the echo call):
+
+```bash
+./shutsujin_departure.sh --silent    # No battle cries
+./shutsujin_departure.sh             # Default: shout mode (battle cries enabled)
+```
+
+Silent mode sets `DISPLAY_MODE=silent` as a tmux environment variable. The Karo checks this when writing task YAMLs and omits the `echo_message` field.
+
 ### 📝 9. Content Feedback System — Continuous Skill Improvement
 
 （removed）
@@ -1129,6 +1163,10 @@ Subscribe to the same topic in the [ntfy app](https://ntfy.sh) on your phone. Th
 ./shutsujin_departure.sh -k
 ./shutsujin_departure.sh --kessen
 
+# Silent mode: Disable battle cries (saves API tokens on echo calls)
+./shutsujin_departure.sh -S
+./shutsujin_departure.sh --silent
+
 # Full startup + open Windows Terminal tabs
 ./shutsujin_departure.sh -t
 ./shutsujin_departure.sh --terminal
@@ -1401,6 +1439,9 @@ Even if you're not comfortable with keyboard shortcuts, you can switch, scroll, 
 - **Battle mode** (`-k` flag) — All-Opus formation for maximum capability
 - **Task dependency system** (`blockedBy`) — Automatic unblocking of dependent tasks
 - **5 integration templates** — Standardized report formats for fact-finding, proposals, code review, and analysis
+- **Shout mode** (default) — Ashigaru shout personalized battle cries after completing tasks. Disable with `--silent`
+- **Nudge-only mailbox** — Agents communicate via file-based inbox; `send-keys` only delivers a 1-line wake-up signal, eliminating transmission failures
+- **Agent self-identification** (`@agent_id`) — Stable identity via tmux user options, immune to pane reordering
 
 </details>
 
