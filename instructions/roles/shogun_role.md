@@ -58,7 +58,9 @@ command: "Improve karo pipeline"
 1. **Dashboard**: Karo's responsibility. Shogun reads it, never writes it.
 2. **Chain of command**: Shogun → Karo → Ashigaru. Never bypass Karo.
 3. **Reports**: Check `queue/reports/ashigaru{N}_report.yaml` when waiting.
-4. **Karo state**: Before sending commands, verify karo isn't busy: `tmux capture-pane -t multiagent:0.0 -p | tail -20`
+4. **Karo state**: Before sending commands, verify karo isn't busy:
+   - **tmux**: `tmux capture-pane -t multiagent:0.0 -p | tail -20`
+   - **zellij**: `zellij_capture_pane "karo" 20` or `zellij_check_pane_busy "karo"` (source `zellij-utils.sh` first)
 5. **Screenshots**: See `config/settings.yaml` → `screenshot.path`
 6. **Skill candidates**: Ashigaru reports include `skill_candidate:`. Karo collects → dashboard. Shogun approves → creates design doc.
 7. **Action Required Rule (CRITICAL)**: ALL items needing Lord's decision → dashboard.md 🚨要対応 section. ALWAYS. Even if also written elsewhere. Forgetting = Lord gets angry.

@@ -12,6 +12,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![v3.0 Multi-CLI](https://img.shields.io/badge/v3.0-Multi--CLI_Support-ff6600?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PHRleHQgeD0iMCIgeT0iMTIiIGZvbnQtc2l6ZT0iMTIiPuKalTwvdGV4dD48L3N2Zz4=)](https://github.com/yohey-w/multi-agent-shogun)
 [![Shell](https://img.shields.io/badge/Shell%2FBash-100%25-green)]()
+[![tmux](https://img.shields.io/badge/tmux-supported-green)](https://github.com/tmux/tmux)
+[![zellij](https://img.shields.io/badge/zellij-supported-blue)](https://zellij.dev)
 
 [English](README.md) | [日本語](README_ja.md)
 
@@ -213,6 +215,9 @@ cd /mnt/c/tools/multi-agent-shogun
 
 ```bash
 ./shutsujin_departure.sh
+
+# zellij版（オプション）
+./shutsujin_departure_zellij.sh
 ```
 
 </td>
@@ -348,6 +353,8 @@ wsl --install
 | `install.bat` | Windows: WSL2 + Ubuntu のセットアップ | 初回のみ |
 | `first_setup.sh` | tmux、Node.js、Claude Code CLI のインストール + Memory MCP設定 | 初回のみ |
 | `shutsujin_departure.sh` | tmuxセッション作成 + Claude Code起動 + 指示書読み込み + ntfyリスナー起動 | 毎日 |
+| `shutsujin_departure_zellij.sh` | zellijセッション作成 + Claude Code起動（zellij版） | 毎日 |
+| `zellij-utils.sh` | zellij版のsend-keys代替ユーティリティ関数群 | zellij版で使用 |
 
 ### `install.bat` が自動で行うこと：
 - ✅ WSL2がインストールされているかチェック（未インストールなら案内）
@@ -1230,12 +1237,44 @@ cp config/ntfy_auth.env.sample config/ntfy_auth.env
 </details>
 
 <details>
+<summary><b>shutsujin_departure_zellij.sh オプション（zellij版）</b>（クリックで展開）</summary>
+
+```bash
+# デフォルト: フル起動（zellijセッション + Claude Code起動）
+./shutsujin_departure_zellij.sh
+
+# クリーンスタート: 既存セッションを削除して新規作成
+./shutsujin_departure_zellij.sh -c
+./shutsujin_departure_zellij.sh --clean
+
+# セッションセットアップのみ（Claude Code起動なし）
+./shutsujin_departure_zellij.sh -s
+./shutsujin_departure_zellij.sh --setup-only
+
+# 決戦の陣: 全足軽をOpusで起動
+./shutsujin_departure_zellij.sh -k
+./shutsujin_departure_zellij.sh --kessen
+
+# ヘルプを表示
+./shutsujin_departure_zellij.sh -h
+./shutsujin_departure_zellij.sh --help
+```
+
+</details>
+
+<details>
 <summary><b>よく使うワークフロー</b>（クリックで展開）</summary>
 
-**通常の毎日の使用：**
+**通常の毎日の使用（tmux版）：**
 ```bash
 ./shutsujin_departure.sh          # 全て起動
 tmux attach-session -t shogun     # 接続してコマンドを出す
+```
+
+**通常の毎日の使用（zellij版）：**
+```bash
+./shutsujin_departure_zellij.sh   # 全て起動
+zellij attach shogun              # 接続してコマンドを出す
 ```
 
 **デバッグモード（手動制御）：**
@@ -1287,7 +1326,14 @@ multi-agent-shogun/
 │  ┌─────────────────── セットアップスクリプト ───────────────────┐
 ├── install.bat               # Windows: 初回セットアップ
 ├── first_setup.sh            # Ubuntu/Mac: 初回セットアップ
-├── shutsujin_departure.sh    # 毎日の起動（指示書自動読み込み）
+├── shutsujin_departure.sh    # 毎日の起動（tmux版）
+├── shutsujin_departure_zellij.sh  # 毎日の起動（zellij版）
+├── zellij-utils.sh           # zellij用ユーティリティ関数
+│  └────────────────────────────────────────────────────────────┘
+│
+│  ┌─────────────────── zellijレイアウト ────────────────────────┐
+├── layouts/
+│   └── shogun.kdl            # zellijレイアウト定義
 │  └────────────────────────────────────────────────────────────┘
 │
 ├── instructions/             # エージェント指示書

@@ -12,6 +12,8 @@ Run 10 AI coding agents in parallel — **Claude Code, OpenAI Codex, GitHub Copi
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![v3.0 Multi-CLI](https://img.shields.io/badge/v3.0-Multi--CLI_Support-ff6600?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PHRleHQgeD0iMCIgeT0iMTIiIGZvbnQtc2l6ZT0iMTIiPuKalTwvdGV4dD48L3N2Zz4=)](https://github.com/yohey-w/multi-agent-shogun)
 [![Shell](https://img.shields.io/badge/Shell%2FBash-100%25-green)]()
+[![tmux](https://img.shields.io/badge/tmux-supported-green)](https://github.com/tmux/tmux)
+[![zellij](https://img.shields.io/badge/zellij-supported-blue)](https://zellij.dev)
 
 [English](README.md) | [日本語](README_ja.md)
 
@@ -213,6 +215,9 @@ cd /mnt/c/tools/multi-agent-shogun
 
 ```bash
 ./shutsujin_departure.sh
+
+# zellij version (alternative)
+./shutsujin_departure_zellij.sh
 ```
 
 </td>
@@ -1250,12 +1255,44 @@ Priority: Token > Basic > None. If neither is set, no auth headers are sent (bac
 </details>
 
 <details>
+<summary><b>shutsujin_departure_zellij.sh Options (zellij version)</b> (click to expand)</summary>
+
+```bash
+# Default: Full startup (zellij session + Claude Code launch)
+./shutsujin_departure_zellij.sh
+
+# Clean start: Delete existing session and start fresh
+./shutsujin_departure_zellij.sh -c
+./shutsujin_departure_zellij.sh --clean
+
+# Session setup only (no Claude Code launch)
+./shutsujin_departure_zellij.sh -s
+./shutsujin_departure_zellij.sh --setup-only
+
+# Battle formation: All Ashigaru on Opus
+./shutsujin_departure_zellij.sh -k
+./shutsujin_departure_zellij.sh --kessen
+
+# Show help
+./shutsujin_departure_zellij.sh -h
+./shutsujin_departure_zellij.sh --help
+```
+
+</details>
+
+<details>
 <summary><b>Common Workflows</b> (click to expand)</summary>
 
-**Normal daily use:**
+**Normal daily use (tmux):**
 ```bash
 ./shutsujin_departure.sh          # Launch everything
 tmux attach-session -t shogun     # Connect and give commands
+```
+
+**Normal daily use (zellij):**
+```bash
+./shutsujin_departure_zellij.sh   # Launch everything
+zellij attach shogun              # Connect and give commands
 ```
 
 **Debug mode (manual control):**
@@ -1307,7 +1344,14 @@ multi-agent-shogun/
 │  ┌──────────────── Setup Scripts ────────────────────┐
 ├── install.bat               # Windows: First-time setup
 ├── first_setup.sh            # Ubuntu/Mac: First-time setup
-├── shutsujin_departure.sh    # Daily deployment (auto-loads instructions)
+├── shutsujin_departure.sh    # Daily deployment (tmux version)
+├── shutsujin_departure_zellij.sh  # Daily deployment (zellij version)
+├── zellij-utils.sh           # zellij utility functions (send-keys alternative)
+│  └──────────────────────────────────────────────────┘
+│
+│  ┌──────────────── zellij Layout ─────────────────────┐
+├── layouts/
+│   └── shogun.kdl            # zellij layout definition
 │  └──────────────────────────────────────────────────┘
 │
 ├── instructions/             # Agent behavior definitions

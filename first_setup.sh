@@ -175,6 +175,27 @@ fi
 RESULTS+=("tmux マウス設定: OK")
 
 # ============================================================
+# STEP 3.5: zellij チェック・インストール（オプション）
+# ============================================================
+log_step "STEP 3.5: zellij チェック（オプション）"
+
+if command -v zellij &> /dev/null; then
+    ZELLIJ_VERSION=$(zellij --version | awk '{print $2}')
+    log_success "zellij がインストール済みです (v$ZELLIJ_VERSION)"
+    RESULTS+=("zellij: OK (v$ZELLIJ_VERSION)")
+else
+    log_info "zellij は未インストールです"
+    echo ""
+    echo "  zellij版を使用する場合はインストールしてください:"
+    echo "    macOS:   brew install zellij"
+    echo "    Linux:   cargo install zellij"
+    echo "    または:  https://zellij.dev/documentation/installation"
+    echo ""
+    echo "  tmux版のみ使用する場合はスキップ可能です。"
+    RESULTS+=("zellij: 未インストール (オプション)")
+fi
+
+# ============================================================
 # STEP 4: Node.js チェック
 # ============================================================
 log_step "STEP 4: Node.js チェック"
@@ -831,11 +852,19 @@ echo ""
 echo "  出陣（全エージェント起動）:"
 echo "     ./shutsujin_departure.sh"
 echo ""
-echo "  オプション:"
+echo "  【zellij版】出陣（全エージェント起動）:"
+echo "     ./shutsujin_departure_zellij.sh"
+echo ""
+echo "  tmux版オプション:"
 echo "     ./shutsujin_departure.sh -s            # セットアップのみ（Claude手動起動）"
 echo "     ./shutsujin_departure.sh -t            # Windows Terminalタブ展開"
 echo "     ./shutsujin_departure.sh -shell bash   # bash用プロンプトで起動"
 echo "     ./shutsujin_departure.sh -shell zsh    # zsh用プロンプトで起動"
+echo ""
+echo "  zellij版オプション:"
+echo "     ./shutsujin_departure_zellij.sh -s     # セットアップのみ（Claude手動起動）"
+echo "     ./shutsujin_departure_zellij.sh -c     # クリーンスタート"
+echo "     ./shutsujin_departure_zellij.sh -k     # 決戦の陣（全足軽Opus）"
 echo ""
 echo "  ※ シェル設定は config/settings.yaml の shell: でも変更可能です"
 echo ""

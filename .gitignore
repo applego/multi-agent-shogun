@@ -57,9 +57,15 @@
 
 # Setup and deployment scripts
 !shutsujin_departure.sh
+!shutsujin_departure_zellij.sh
+!zellij-utils.sh
 !first_setup.sh
 !setup.sh
 !install.bat
+
+# zellij layout
+!layouts/
+!layouts/shogun.kdl
 
 # Development tooling
 !Makefile

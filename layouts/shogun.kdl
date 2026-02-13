@@ -1,0 +1,76 @@
+// ============================================================
+// multi-agent-shogun zellij レイアウト定義
+// ============================================================
+// 使用方法: zellij --layout layouts/shogun.kdl
+//
+// 構成:
+//   - shogun タブ: 将軍 (1ペイン)
+//   - multiagent タブ: 家老 + 足軽1-8 (3x3 = 9ペイン)
+// ============================================================
+
+layout {
+    // ============================================================
+    // Tab 1: 将軍の本陣 (SHOGUN)
+    // ============================================================
+    tab name="shogun" {
+        pane name="shogun" command="bash" {
+            args "-c" "export AGENT_ID=shogun && exec bash"
+        }
+    }
+
+    // ============================================================
+    // Tab 2: 家老・足軽の陣 (3x3 グリッド)
+    // ============================================================
+    // レイアウト:
+    //   +--------+--------+--------+
+    //   |  karo  |ashigaru|ashigaru|
+    //   |        |   3    |   6    |
+    //   +--------+--------+--------+
+    //   |ashigaru|ashigaru|ashigaru|
+    //   |   1    |   4    |   7    |
+    //   +--------+--------+--------+
+    //   |ashigaru|ashigaru|ashigaru|
+    //   |   2    |   5    |   8    |
+    //   +--------+--------+--------+
+    // ============================================================
+    tab name="multiagent" focus=true {
+        pane split_direction="vertical" {
+            // 左列 (karo, ashigaru1, ashigaru2)
+            pane split_direction="horizontal" {
+                pane name="karo" command="bash" {
+                    args "-c" "export AGENT_ID=karo && exec bash"
+                }
+                pane name="ashigaru1" command="bash" {
+                    args "-c" "export AGENT_ID=ashigaru1 && exec bash"
+                }
+                pane name="ashigaru2" command="bash" {
+                    args "-c" "export AGENT_ID=ashigaru2 && exec bash"
+                }
+            }
+            // 中列 (ashigaru3, ashigaru4, ashigaru5)
+            pane split_direction="horizontal" {
+                pane name="ashigaru3" command="bash" {
+                    args "-c" "export AGENT_ID=ashigaru3 && exec bash"
+                }
+                pane name="ashigaru4" command="bash" {
+                    args "-c" "export AGENT_ID=ashigaru4 && exec bash"
+                }
+                pane name="ashigaru5" command="bash" {
+                    args "-c" "export AGENT_ID=ashigaru5 && exec bash"
+                }
+            }
+            // 右列 (ashigaru6, ashigaru7, ashigaru8)
+            pane split_direction="horizontal" {
+                pane name="ashigaru6" command="bash" {
+                    args "-c" "export AGENT_ID=ashigaru6 && exec bash"
+                }
+                pane name="ashigaru7" command="bash" {
+                    args "-c" "export AGENT_ID=ashigaru7 && exec bash"
+                }
+                pane name="ashigaru8" command="bash" {
+                    args "-c" "export AGENT_ID=ashigaru8 && exec bash"
+                }
+            }
+        }
+    }
+}
