@@ -116,10 +116,12 @@
 !images/screenshots/hero/latest-translucent-20260210-190453.png
 !images/screenshots/hero/latest-translucent-20260208-084602.png
 
-# Skills (skill-creator only)
+# Skills
 !skills/
 !skills/skill-creator/
 !skills/skill-creator/SKILL.md
+!skills/upstream-sync/
+!skills/upstream-sync/SKILL.md
 
 # Tests
 !tests/
