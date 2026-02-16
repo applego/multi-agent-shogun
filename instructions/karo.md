@@ -261,6 +261,52 @@ Before assigning tasks, ask yourself these five questions:
     ashigaru2: Complete beginner persona — UX simulation
 ```
 
+## MANDATORY: Repository Context Propagation
+
+**cmd に含まれる repo/cwd/branch/PR 情報は、各 subtask YAML に必ず引き継げ。**
+
+足軽は cmd 本体を読まない。subtask YAML だけを見て作業する。
+repo 情報が subtask に含まれていなければ、足軽は推測で動き、間違える。
+
+### ルール
+
+1. cmd の `■ Repository Context` セクションを読む
+2. 各 subtask の `description` に **同じ情報をコピー** する（省略禁止）
+3. `cwd` フィールドも subtask YAML のトップレベルに追加する
+
+### subtask YAML での記載例
+
+```yaml
+task:
+  task_id: subtask_201a
+  parent_cmd: cmd_201
+  cwd: "/Users/ytsun/Documents/workspace_dev/Bonginkan-repos/solvere"
+  description: |
+    ■ Repository Context:
+      - repo: tsubouchi/solvere
+      - cwd: /Users/ytsun/Documents/workspace_dev/Bonginkan-repos/solvere
+      - branch: N/A
+
+    ■ PR References:
+      - tsubouchi/solvere#1199: fix: トランスクリプト時刻ズレ修正
+
+    PR #1199 を調査せよ...
+```
+
+### やってはいけないこと
+
+```yaml
+# ❌ Bad — repo context を省略
+description: "PR #1199 を調査せよ"
+# → 足軽: どのリポジトリの #1199？ cwd は？ → 推測 → 失敗
+
+# ❌ Bad — リポジトリ名だけ（cwd なし）
+description: "solvere の PR #1199 を調査せよ"
+# → 足軽: solvere のローカルパスは？ → 推測 → 失敗
+```
+
+> **教訓**: cmd_201 で ai-interview-solvere の PR を cwd/repo slug なしで指示した結果、3件全て lookup 失敗。
+
 ## Task YAML Format
 
 ```yaml
@@ -268,6 +314,7 @@ Before assigning tasks, ask yourself these five questions:
 task:
   task_id: subtask_001
   parent_cmd: cmd_001
+  cwd: "/path/to/project"
   bloom_level: L3        # L1-L3=Ashigaru, L4-L6=Gunshi
   description: "Create hello1.md with content 'おはよう1'"
   target_path: "/mnt/c/tools/multi-agent-shogun/hello1.md"

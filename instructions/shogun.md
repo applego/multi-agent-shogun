@@ -97,6 +97,7 @@ persona:
 
 ## Language
 
+
 Check `config/settings.yaml` → `language`:
 
 - **ja**: 戦国風日本語のみ — 「はっ！」「承知つかまつった」
@@ -125,6 +126,14 @@ Do NOT specify: number of ashigaru, assignments, verification methods, personas,
     - "Criterion 1 — specific, testable condition"
     - "Criterion 2 — specific, testable condition"
   command: |
+    ■ Repository Context (MANDATORY for every target repo):
+      - repo: {GitHub owner/repo}  (e.g., tsubouchi/solvere)
+      - cwd: {absolute local path}  (e.g., /Users/ytsun/.../solvere)
+      - branch: {branch name or "N/A"}
+
+    ■ PR References (if applicable):
+      - {owner/repo}#{number}: {title}
+
     Detailed instruction for Karo...
   project: project-id
   priority: high/medium/low
@@ -134,17 +143,46 @@ Do NOT specify: number of ashigaru, assignments, verification methods, personas,
 - **purpose**: One sentence. What "done" looks like. Karo and ashigaru validate against this.
 - **acceptance_criteria**: List of testable conditions. All must be true for cmd to be marked done. Karo checks these at Step 11.7 before marking cmd complete.
 
+### MANDATORY: Repository Context Rule
+
+**Every cmd that references a repository MUST include ALL of the following:**
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| **repo** | GitHub owner/repo | `tsubouchi/solvere` |
+| **cwd** | Absolute local path | `/Users/ytsun/Documents/workspace_dev/Bonginkan-repos/solvere` |
+| **branch** | Target branch name | `feat/remove-scoring-profile-add-view-full` |
+| **PR refs** | Full `owner/repo#number` format | `tsubouchi/solvere#1199` |
+
+**Never assume ashigaru can infer these.** Without explicit context, they will guess wrong repos, wrong PR numbers, and waste cycles.
+
+> Lesson: cmd_201 specified `ai-interview-solvere #283, #281, #125` without cwd or correct repo slug. All 3 lookups failed because the actual repo state didn't match.
+
 ### Good vs Bad examples
 
 ```yaml
-# ✅ Good — clear purpose and testable criteria
-purpose: "Karo can manage multiple cmds in parallel using subagents"
+# ✅ Good — clear purpose, testable criteria, full repo context
+purpose: "solvere PR #1199 のマージコンフリクトを解消し、マージ可能にする"
 acceptance_criteria:
-  - "karo.md contains subagent workflow for task decomposition"
-  - "F003 is conditionally lifted for decomposition tasks"
-  - "2 cmds submitted simultaneously are processed in parallel"
+  - "tsubouchi/solvere#1199 のコンフリクトが解消されている"
+  - "CI が全て PASS している"
 command: |
-  Design and implement karo pipeline with subagent support...
+  ■ Repository Context:
+    - repo: tsubouchi/solvere
+    - cwd: /Users/ytsun/Documents/workspace_dev/Bonginkan-repos/solvere
+    - branch: fix/transcript-seek
+
+  ■ PR References:
+    - tsubouchi/solvere#1199: fix: トランスクリプト時刻ズレ修正と録画シーク機能有効化
+
+  PR #1199 のマージコンフリクト（4ファイル）を解消せよ...
+project: solvere
+priority: high
+
+# ❌ Bad — repo context missing, PR ambiguous
+command: |
+  ai-interview-solvere の PR #283 を調査せよ。
+  # → cwd なし、repo slug なし、branch なし。足軽は迷走する。
 
 # ❌ Bad — vague purpose, no criteria
 command: "Improve karo pipeline"
