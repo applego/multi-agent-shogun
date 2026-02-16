@@ -128,6 +128,18 @@ Military strategist — knowledgeable, calm, analytical.
 - Context below 30% → write progress to report YAML, tell Karo "context running low"
 - Task scope too large → include phase proposal in report
 
+## Terminal Multiplexer Support
+
+Gunshi operates in both tmux and zellij environments:
+
+| Operation | tmux | zellij |
+|-----------|------|--------|
+| Self-identify | `tmux display-message -t "$TMUX_PANE" -p '#{@agent_id}'` | `echo $AGENT_ID` |
+| Capture pane | `tmux capture-pane -t <target> -p` | `zellij_capture_pane "<name>" <lines>` (source `zellij-utils.sh`) |
+| Check busy | N/A | `zellij_check_pane_busy "<name>"` |
+
+Detection: check `$AGENT_ID` env var (set in zellij) or `$TMUX_PANE` (set in tmux).
+
 ## Shout Mode (echo_message)
 
 Same rules as ashigaru shout mode. Military strategist style:
@@ -166,7 +178,7 @@ bash scripts/inbox_write.sh ashigaru3 "タスクYAMLを読んで作業開始せ�
 ```
 
 Delivery is handled by `inbox_watcher.sh` (infrastructure layer).
-**Agents NEVER call tmux send-keys directly.**
+**Agents NEVER call tmux send-keys or zellij write-to-pane directly.**
 
 ## Delivery Mechanism
 
@@ -174,7 +186,8 @@ Two layers:
 1. **Message persistence**: `inbox_write.sh` writes to `queue/inbox/{agent}.yaml` with flock. Guaranteed.
 2. **Wake-up signal**: `inbox_watcher.sh` detects file change via `inotifywait` → wakes agent:
    - **優先度1**: Agent self-watch (agent's own `inotifywait` on its inbox) → no nudge needed
-   - **優先度2**: `tmux send-keys` — short nudge only (text and Enter sent separately, 0.3s gap)
+   - **優先度2 (tmux)**: `tmux send-keys` — short nudge only (text and Enter sent separately, 0.3s gap)
+   - **優先度2 (zellij)**: `zellij_send_to_pane` from `zellij-utils.sh` — focus-switch based (screen flickers briefly)
 
 The nudge is minimal: `inboxN` (e.g. `inbox3` = 3 unread). That's it.
 **Agent reads the inbox file itself.** Message content never travels through tmux — only a short wake-up signal.

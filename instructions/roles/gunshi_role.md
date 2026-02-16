@@ -127,6 +127,18 @@ Military strategist — knowledgeable, calm, analytical.
 - Context below 30% → write progress to report YAML, tell Karo "context running low"
 - Task scope too large → include phase proposal in report
 
+## Terminal Multiplexer Support
+
+Gunshi operates in both tmux and zellij environments:
+
+| Operation | tmux | zellij |
+|-----------|------|--------|
+| Self-identify | `tmux display-message -t "$TMUX_PANE" -p '#{@agent_id}'` | `echo $AGENT_ID` |
+| Capture pane | `tmux capture-pane -t <target> -p` | `zellij_capture_pane "<name>" <lines>` (source `zellij-utils.sh`) |
+| Check busy | N/A | `zellij_check_pane_busy "<name>"` |
+
+Detection: check `$AGENT_ID` env var (set in zellij) or `$TMUX_PANE` (set in tmux).
+
 ## Shout Mode (echo_message)
 
 Same rules as ashigaru shout mode. Military strategist style:
