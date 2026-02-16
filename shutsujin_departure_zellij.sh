@@ -22,6 +22,32 @@ if [ -f "./config/settings.yaml" ]; then
     LANG_SETTING=$(grep "^language:" ./config/settings.yaml 2>/dev/null | awk '{print $2}' || echo "ja")
 fi
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Python venv preflight check
+# ───────────────────────────────────────────────────────────────────────────────
+# inbox_write.sh, inbox_watcher.sh, cli_adapter.sh が .venv/bin/python3 に依存。
+# venv が存在しない場合は自動作成する（git pull 後の初回起動対策）。
+# ═══════════════════════════════════════════════════════════════════════════════
+VENV_DIR="$SCRIPT_DIR/.venv"
+if [ ! -f "$VENV_DIR/bin/python3" ] || ! "$VENV_DIR/bin/python3" -c "import yaml" 2>/dev/null; then
+    echo -e "\033[1;33m【報】\033[0m Python venv をセットアップ中..."
+    if command -v python3 &>/dev/null; then
+        python3 -m venv "$VENV_DIR" 2>/dev/null || {
+            echo -e "\033[1;31m【ERROR】\033[0m python3 -m venv に失敗しました。python3-venv パッケージが必要かもしれません。"
+            echo "  Ubuntu/Debian: sudo apt-get install python3-venv"
+            exit 1
+        }
+        "$VENV_DIR/bin/pip" install -r "$SCRIPT_DIR/requirements.txt" -q 2>/dev/null || {
+            echo -e "\033[1;31m【ERROR】\033[0m pip install に失敗しました。"
+            exit 1
+        }
+        echo -e "\033[1;32m【成】\033[0m Python venv セットアップ完了"
+    else
+        echo -e "\033[1;31m【ERROR】\033[0m python3 が見つかりません。first_setup.sh を実行してください。"
+        exit 1
+    fi
+fi
+
 # 色付きログ関数（戦国風）
 log_info() {
     echo -e "\033[1;33m【報】\033[0m $1"
