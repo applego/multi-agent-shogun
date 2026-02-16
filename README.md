@@ -10,7 +10,7 @@ Run 10 AI coding agents in parallel — **Claude Code, OpenAI Codex, GitHub Copi
 
 [![GitHub Stars](https://img.shields.io/github/stars/yohey-w/multi-agent-shogun?style=social)](https://github.com/yohey-w/multi-agent-shogun)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![v3.0 Multi-CLI](https://img.shields.io/badge/v3.0-Multi--CLI_Support-ff6600?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PHRleHQgeD0iMCIgeT0iMTIiIGZvbnQtc2l6ZT0iMTIiPuKalTwvdGV4dD48L3N2Zz4=)](https://github.com/yohey-w/multi-agent-shogun)
+[![v3.4 Bloom→Agent Routing](https://img.shields.io/badge/v3.4-Bloom→Agent_Routing-ff6600?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PHRleHQgeD0iMCIgeT0iMTIiIGZvbnQtc2l6ZT0iMTIiPuKalTwvdGV4dD48L3N2Zz4=)](https://github.com/yohey-w/multi-agent-shogun)
 [![Shell](https://img.shields.io/badge/Shell%2FBash-100%25-green)]()
 [![tmux](https://img.shields.io/badge/tmux-supported-green)](https://github.com/tmux/tmux)
 [![zellij](https://img.shields.io/badge/zellij-supported-blue)](https://zellij.dev)
@@ -28,7 +28,7 @@ Run 10 AI coding agents in parallel — **Claude Code, OpenAI Codex, GitHub Copi
   <img src="images/company-creed-all-panes.png" alt="Karo and Ashigaru panes reacting in parallel" width="520">
 </p>
 
-<p align="center"><i>One Karo (manager) coordinating 8 Ashigaru (workers) — real session, no mock data.</i></p>
+<p align="center"><i>One Karo (manager) coordinating 7 Ashigaru (workers) + 1 Gunshi (strategist) — real session, no mock data.</i></p>
 
 ---
 
@@ -37,7 +37,7 @@ Run 10 AI coding agents in parallel — **Claude Code, OpenAI Codex, GitHub Copi
 **multi-agent-shogun** is a system that runs multiple AI coding CLI instances simultaneously, orchestrating them like a feudal Japanese army. Supports **Claude Code**, **OpenAI Codex**, **GitHub Copilot**, and **Kimi Code**.
 
 **Why use it?**
-- One command spawns 8 AI workers executing in parallel
+- One command spawns 7 AI workers + 1 strategist executing in parallel
 - Zero wait time — give your next order while tasks run in the background
 - AI remembers your preferences across sessions (Memory MCP)
 - Real-time progress on a dashboard
@@ -54,10 +54,10 @@ Run 10 AI coding agents in parallel — **Claude Code, OpenAI Codex, GitHub Copi
       │    KARO     │  ← Distributes tasks to workers
       └──────┬──────┘
              │
-    ┌─┬─┬─┬─┴─┬─┬─┬─┐
-    │1│2│3│4│5│6│7│8│  ← 8 workers execute in parallel
-    └─┴─┴─┴─┴─┴─┴─┴─┘
-         ASHIGARU
+    ┌─┬─┬─┬─┴─┬─┬─┬─┬────────┐
+    │1│2│3│4│5│6│7│ GUNSHI │  ← 7 workers + 1 strategist
+    └─┴─┴─┴─┴─┴─┴─┴────────┘
+       ASHIGARU      軍師
 ```
 
 ---
@@ -105,7 +105,7 @@ Shogun isn't locked to one vendor. The system supports 4 CLI tools, each with un
 | CLI | Key Strength | Default Model |
 |-----|-------------|---------------|
 | **Claude Code** | Battle-tested tmux integration, Memory MCP, dedicated file tools (Read/Write/Edit/Glob/Grep) | Claude Sonnet 4.5 |
-| **OpenAI Codex** | Sandbox execution, JSONL structured output, `codex exec` headless mode | gpt-5.3-codex |
+| **OpenAI Codex** | Sandbox execution, JSONL structured output, `codex exec` headless mode, **per-model `--model` flag** | gpt-5.3-codex / **gpt-5.3-codex-spark** |
 | **GitHub Copilot** | Built-in GitHub MCP, 4 specialized agents (Explore/Task/Plan/Code-review), `/delegate` to coding agent | Claude Sonnet 4.5 |
 | **Kimi Code** | Free tier available, strong multilingual support | Kimi k2 |
 
@@ -284,7 +284,16 @@ Control your AI army from your phone — bed, café, or bathroom.
    csm    # See all 9 panes
    ```
 
-**Disconnect:** Just swipe the Termux window closed. tmux sessions survive — agents keep working.
+**Disconnect:** Just swipe the Termux window closed. tmux sessions survive — agents keep working. Temporary viewer sessions are auto-cleaned (destroy-unattached).
+
+**Recommended: SSH keepalive** — prevents zombie connections when Termux is swiped away:
+```bash
+# On your server (WSL), run once:
+sudo sed -i 's/#ClientAliveInterval 0/ClientAliveInterval 15/' /etc/ssh/sshd_config
+sudo sed -i 's/#ClientAliveCountMax 3/ClientAliveCountMax 3/' /etc/ssh/sshd_config
+sudo systemctl restart ssh
+```
+This detects dead connections within 45 seconds instead of waiting for TCP timeout.
 
 **Voice input:** Use your phone's voice keyboard to speak commands. The Shogun understands natural language, so typos from speech-to-text don't matter.
 
@@ -396,12 +405,13 @@ Whichever option you chose, **10 AI agents** are automatically launched:
 | Agent | Role | Count |
 |-------|------|-------|
 | 🏯 Shogun | Supreme commander — receives your orders | 1 |
-| 📋 Karo | Manager — distributes tasks | 1 |
-| ⚔️ Ashigaru | Workers — execute tasks in parallel | 8 |
+| 📋 Karo | Manager — distributes tasks, quality checks | 1 |
+| ⚔️ Ashigaru | Workers — execute implementation tasks in parallel | 7 |
+| 🧠 Gunshi | Strategist — handles analysis, evaluation, and design | 1 |
 
 Two tmux sessions are created:
 - `shogun` — connect here to give commands
-- `multiagent` — workers running in the background
+- `multiagent` — Karo, Ashigaru, and Gunshi running in the background
 
 ---
 
@@ -898,38 +908,29 @@ SayTask handles personal productivity (capture → schedule → remind). The cmd
 
 ## Model Settings
 
-| Agent | Default Model | Thinking | Rationale |
-|-------|--------------|----------|-----------|
-| Shogun | Opus | **Enabled (high)** | Strategic discussions, research, and policy design require deep reasoning. Use `--shogun-no-thinking` to disable for relay-only mode |
-| Karo | Opus | Enabled | Task distribution requires careful judgment |
-| Ashigaru 1–4 | Sonnet | Enabled | Cost-efficient for standard tasks |
-| Ashigaru 5–8 | Opus | Enabled | Full capability for complex tasks |
+| Agent | Default Model | Thinking | Role |
+|-------|--------------|----------|------|
+| Shogun | Opus | **Enabled (high)** | Strategic advisor to the Lord. Use `--shogun-no-thinking` for relay-only mode |
+| Karo | Sonnet | Enabled | Task distribution, simple QC, dashboard management |
+| Gunshi | Opus | Enabled | Deep analysis, design review, architecture evaluation |
+| Ashigaru 1–7 | Sonnet | Enabled | Implementation: code, research, file operations |
 
-The Shogun serves as the Lord's strategic advisor — not just a task relay. Strategic discussions, research analysis, and policy design are Bloom's Taxonomy Level 4–6 (analysis, evaluation, creation), requiring Thinking mode enabled. For relay-only use, disable with `--shogun-no-thinking`.
+The system splits work by **cognitive complexity**, not model tier. Ashigaru handle implementation (L1–L3), while the Gunshi handles tasks requiring deep reasoning (L4–L6). This eliminates the need for dynamic model switching — the right agent gets the right task from the start.
 
-### Battle Formations
+### Bloom's Taxonomy → Agent Routing
 
-| Formation | Ashigaru 1–4 | Ashigaru 5–8 | Command |
-|-----------|-------------|-------------|---------|
-| **Normal** (default) | Sonnet | Opus | `./shutsujin_departure.sh` |
-| **Battle** (`-k` flag) | Opus | Opus | `./shutsujin_departure.sh -k` |
+Tasks are classified using Bloom's Taxonomy and routed to the appropriate **agent**, not model:
 
-Half the squad runs on the cheaper Sonnet model by default. When it's crunch time, switch to Battle formation with `-k` (`--kessen`) for all-Opus maximum capability. The Karo can also promote individual Ashigaru mid-session with `/model opus` when a specific task demands it.
+| Level | Category | Description | Routed To |
+|-------|----------|-------------|-----------|
+| L1 | Remember | Recall facts, copy, list | **Ashigaru** |
+| L2 | Understand | Explain, summarize, paraphrase | **Ashigaru** |
+| L3 | Apply | Execute procedures, implement known patterns | **Ashigaru** |
+| L4 | Analyze | Compare, investigate, deconstruct | **Gunshi** |
+| L5 | Evaluate | Judge, critique, recommend | **Gunshi** |
+| L6 | Create | Design, build, synthesize new solutions | **Gunshi** |
 
-### Bloom's Taxonomy Task Classification
-
-Tasks are classified using Bloom's Taxonomy to optimize model assignment:
-
-| Level | Category | Description | Model |
-|-------|----------|-------------|-------|
-| L1 | Remember | Recall facts, copy, list | Sonnet |
-| L2 | Understand | Explain, summarize, paraphrase | Sonnet |
-| L3 | Apply | Execute procedures, implement known patterns | Sonnet |
-| L4 | Analyze | Compare, investigate, deconstruct | Opus |
-| L5 | Evaluate | Judge, critique, recommend | Opus |
-| L6 | Create | Design, build, synthesize new solutions | Opus |
-
-The Karo assigns each subtask a Bloom level and routes it to the appropriate agent tier. This ensures cost-efficient execution: routine work goes to Sonnet, while complex reasoning goes to Opus.
+The Karo assigns each subtask a Bloom level and routes it to the appropriate agent. L1–L3 tasks go to Ashigaru for parallel execution; L4–L6 tasks go to the Gunshi for deeper analysis. Simple L4 tasks (e.g., small code review) may still go to Ashigaru when the Karo judges it appropriate.
 
 ### Task Dependencies (blockedBy)
 
@@ -1358,6 +1359,7 @@ multi-agent-shogun/
 │   ├── shogun.md             # Shogun instructions
 │   ├── karo.md               # Karo instructions
 │   ├── ashigaru.md           # Ashigaru instructions
+│   ├── gunshi.md             # Gunshi (strategist) instructions
 │   └── cli_specific/         # CLI-specific tool descriptions
 │       ├── claude_tools.md   # Claude Code tools & features
 │       └── copilot_tools.md  # GitHub Copilot CLI tools & features
@@ -1550,6 +1552,36 @@ tmux respawn-pane -t shogun:0.0 -k 'claude --model opus --dangerously-skip-permi
 Even if you're not comfortable with keyboard shortcuts, you can switch, scroll, and resize panes using just the mouse.
 
 ---
+
+## What's New in v3.4 — Bloom→Agent Routing, E2E Tests, Stop Hook
+
+> **Tasks are now routed by cognitive complexity to the right agent — not by switching models.** Plus comprehensive E2E test coverage and zero-interruption inbox delivery.
+
+- **Bloom → Agent routing** — Replaced dynamic model switching with agent-level routing. L1–L3 tasks go to Ashigaru (Sonnet), L4–L6 tasks go to Gunshi (Opus). No more mid-session `/model opus` promotions — the Karo routes to the right agent from the start
+- **Gunshi (軍師) as first-class agent** — Strategic advisor on pane 8. Handles deep analysis, design review, architecture evaluation, and complex QC. Ashigaru focus on implementation only
+- **E2E test suite (19 tests, 7 scenarios)** — Mock CLI framework simulates agent behavior in isolated tmux sessions. Covers: basic flow, inbox delivery, /clear recovery, escalation, redo, parallel tasks, and blocked_by dependencies
+- **Stop hook inbox delivery** — Claude Code agents automatically check inbox at turn end via `.claude/settings.json` Stop hook. Eliminates the `send-keys` interruption problem entirely for Claude Code agents
+- **Model defaults updated** — Karo: Opus → Sonnet (task distribution doesn't need Opus). All Ashigaru: Sonnet (uniform tier). Gunshi: Opus (deep reasoning)
+
+<details>
+<summary><b>What was in v3.4</b></summary>
+
+- **Stop hook inbox delivery** — Claude Code agents automatically check inbox at turn end via `.claude/settings.json` Stop hook
+- **Escape escalation disabled for Claude Code** — Phase 2 escalation (Escape×2 + C-c) was interrupting active Claude Code turns. Now suppressed; Stop hook handles delivery instead
+- **Gunshi (軍師) role introduced** — New strategic advisor agent (pane 8). Replaces ashigaru8
+- **Codex CLI startup prompt** — `get_startup_prompt()` in `cli_adapter.sh` passes initial `[PROMPT]` argument to Codex CLI launch
+- **Session Start identity protection** — Agents must complete Steps 1-3 before processing inbox
+- **YAML slimming utility** — `scripts/slim_yaml.sh` archives read messages and completed commands
+
+</details>
+
+## What's New in v3.3.2 — GPT-5.3-Codex-Spark Support
+
+> **New model, same YAML.** Add `model: gpt-5.3-codex-spark` to any Codex agent in `settings.yaml`.
+
+- **Codex `--model` flag support** — `build_cli_command()` now passes `settings.yaml` model config to the Codex CLI via `--model`. Supports `gpt-5.3-codex-spark` and any future Codex models
+- **Separate rate limit** — Spark runs on its own rate limit quota, independent of GPT-5.3-Codex. Run both models in parallel across different Ashigaru to **double your effective throughput**
+- **Startup display** — `shutsujin_departure.sh` now shows the actual model name (e.g., `codex/gpt-5.3-codex-spark`) instead of the generic effort level
 
 ## What's New in v3.0 — Multi-CLI
 

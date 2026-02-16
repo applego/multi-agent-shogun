@@ -38,11 +38,11 @@ done < <(ntfy_get_auth_args "$SCRIPT_DIR/config/ntfy_auth.env")
 
 # JSON field extractor (python3 — jq not available)
 parse_json() {
-    python3 -c "import sys,json; print(json.load(sys.stdin).get('$1',''))" 2>/dev/null
+    "$SCRIPT_DIR/.venv/bin/python3" -c "import sys,json; print(json.load(sys.stdin).get('$1',''))" 2>/dev/null
 }
 
 parse_tags() {
-    python3 -c "import sys,json; print(','.join(json.load(sys.stdin).get('tags',[])))" 2>/dev/null
+    "$SCRIPT_DIR/.venv/bin/python3" -c "import sys,json; print(','.join(json.load(sys.stdin).get('tags',[])))" 2>/dev/null
 }
 
 append_ntfy_inbox() {
@@ -57,7 +57,7 @@ append_ntfy_inbox() {
         MSG_ID="$msg_id" \
         MSG_TS="$ts" \
         MSG_TEXT="$msg" \
-        python3 - << 'PY'
+        "$SCRIPT_DIR/.venv/bin/python3" - << 'PY'
 import datetime
 import os
 import shutil
@@ -159,8 +159,8 @@ while true; do
             continue
         fi
 
-        # Wake karo via inbox (ntfy処理は家老の責務)
-        bash "$SCRIPT_DIR/scripts/inbox_write.sh" karo \
+        # Wake shogun via inbox (ntfy処理は将軍が直接受信)
+        bash "$SCRIPT_DIR/scripts/inbox_write.sh" shogun \
             "ntfyから新しいメッセージ受信。queue/ntfy_inbox.yaml を確認し処理せよ。" \
             ntfy_received ntfy_listener
     done

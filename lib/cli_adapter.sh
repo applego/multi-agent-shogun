@@ -8,6 +8,7 @@
 #   get_instruction_file(agent_id [,cli_type]) → 指示書パス
 #   validate_cli_availability(cli_type)     → 0=OK, 1=NG
 #   get_agent_model(agent_id)               → "opus" | "sonnet" | "haiku" | "k2.5"
+#   get_startup_prompt(agent_id)            → 初期プロンプト文字列 or ""
 
 # プロジェクトルートを基準にsettings.yamlのパスを解決
 CLI_ADAPTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -25,7 +26,7 @@ _cli_adapter_read_yaml() {
     local key_path="$1"
     local fallback="${2:-}"
     local result
-    result=$(python3 -c "
+    result=$("$CLI_ADAPTER_PROJECT_ROOT/.venv/bin/python3" -c "
 import yaml, sys
 try:
     with open('${CLI_ADAPTER_SETTINGS}') as f:
@@ -76,7 +77,7 @@ get_cli_type() {
     fi
 
     local result
-    result=$(python3 -c "
+    result=$("$CLI_ADAPTER_PROJECT_ROOT/.venv/bin/python3" -c "
 import yaml, sys
 try:
     with open('${CLI_ADAPTER_SETTINGS}') as f:
@@ -138,7 +139,12 @@ build_cli_command() {
             echo "$cmd"
             ;;
         codex)
-            echo "codex --dangerously-bypass-approvals-and-sandbox --no-alt-screen"
+            local cmd="codex"
+            if [[ -n "$model" ]]; then
+                cmd="$cmd --model $model"
+            fi
+            cmd="$cmd --dangerously-bypass-approvals-and-sandbox --no-alt-screen"
+            echo "$cmd"
             ;;
         copilot)
             echo "copilot --yolo"
@@ -166,6 +172,7 @@ get_instruction_file() {
     case "$agent_id" in
         shogun)    role="shogun" ;;
         karo)      role="karo" ;;
+        gunshi)    role="gunshi" ;;
         ashigaru*) role="ashigaru" ;;
         *)
             echo "" >&2
@@ -257,13 +264,34 @@ get_agent_model() {
             esac
             ;;
         *)
-            # Claude Code/Codex/Copilot用デフォルトモデル（kessen/heiji互換）
+            # Claude Code/Codex/Copilot用デフォルトモデル
             case "$agent_id" in
-                shogun|karo)    echo "opus" ;;
-                ashigaru[1-4])  echo "sonnet" ;;
-                ashigaru[5-8])  echo "opus" ;;
+                shogun)         echo "opus" ;;
+                karo)           echo "sonnet" ;;
+                gunshi)         echo "opus" ;;
+                ashigaru*)      echo "sonnet" ;;
                 *)              echo "sonnet" ;;
             esac
+            ;;
+    esac
+}
+
+# get_startup_prompt(agent_id)
+# CLIが初回起動時に自動実行すべき初期プロンプトを返す
+# Codex CLI: [PROMPT]引数として渡す（サジェストUI停止問題の根本対策）
+# Claude Code: 空（CLAUDE.md自動読込でSession Start手順が起動）
+# Copilot/Kimi: 空（今後対応）
+get_startup_prompt() {
+    local agent_id="$1"
+    local cli_type
+    cli_type=$(get_cli_type "$agent_id")
+
+    case "$cli_type" in
+        codex)
+            echo "Session Start — do ALL of this in one turn, do NOT stop early: 1) tmux display-message -t \"\$TMUX_PANE\" -p '#{@agent_id}' to identify yourself. 2) Read queue/tasks/${agent_id}.yaml. 3) Read queue/inbox/${agent_id}.yaml, mark read:true. 4) Read files listed in context_files. 5) Execute the assigned task to completion — edit files, run commands, write reports. Keep working until the task is done."
+            ;;
+        *)
+            echo ""
             ;;
     esac
 }
